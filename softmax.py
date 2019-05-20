@@ -1,0 +1,53 @@
+import numpy as np
+from utilities import initalize
+
+
+class Softmax(object):
+    def __init__(self, input_size: int,
+                 output_size: int,
+                 init_range: float = 1.0):
+        self.input_size = input_size
+        self.output_size = output_size
+
+        self.W = initalize((output_size, input_size), init_range)
+        self.dW = np.zeros((output_size, input_size))
+
+        self.params = [
+            ('W', self.W, self.dW)
+        ]
+
+    def init_sequence(self):
+        self.pred = []
+        self.x = []
+        self.targets = []
+        self.t = 0
+        self.dW[:] = 0
+
+    def forward(self, x: np.float64):
+        self.t += 1
+
+        y = self.W.dot(x)
+        y = np.exp(y - y.max())
+        y /= y.sum()
+
+        self.pred.append(y)
+        self.x.append(x)
+
+        return y
+
+    def backward(self, target):
+        self.t -= 1
+        self.targets.append(target)
+
+        x = self.x[self.t]
+        d = self.pred[self.t].copy()
+        d[target] -= 1
+
+        self.dW += np.outer(d, x)
+        delta = np.dot(self.W.T, d)
+
+        return delta
+
+    def get_cost(self):
+        combined = zip(self.targets, reversed(self.pred))
+        return sum(-np.log(y[target]) for target, y in combined)
