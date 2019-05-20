@@ -1,5 +1,7 @@
 # summer_internship
 
+seq2seq model with numpy
+
 # Requirements:
 * Python 3.6 or more recent version
 * numpy
